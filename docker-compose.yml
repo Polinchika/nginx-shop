@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend1
+      - backend2
+      - orders
+    restart: always
+    stop_grace_period: 10s
+
+  frontend:
+    image: nginx:alpine
+    restart: always
+    build: ./frontend
+    ports:
+      - "3000:80"
+
+  backend1:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    restart: always
+
+  backend2:
+    build: ./backend
+    restart: always
+
+  orders:
+    build: ./orders
+    volumes:
+      - ./orders:/app
+    restart: always
+
+  monitor:
+    build: ./monitoring
+    restart: always
+
+volumes:
+  nginx_logs:
